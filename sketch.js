@@ -1,8 +1,10 @@
 var start = false;
 
-const pointCount = 30;
+const pointCount = Math.floor(Math.min(window.innerWidth, window.innerHeight)/32);
 
-var size = Math.min(window.innerWidth, window.innerHeight)/pointCount;
+var size = pointCount;
+
+var c;
 
 var xpos = [];
 var ypos = [];
@@ -37,24 +39,70 @@ var sy = 0;
 // INPUT
 
 document.getElementById("startButton").addEventListener("click", ()=>{
+    selectingStart = false;
+    selectingEnd = false;
+    placingBlock = false;
     start = !start;
 });
 
-startx = document.getElementById("startx");
-starty = document.getElementById("starty");
-endx = document.getElementById("endx");
-endy = document.getElementById("endy");
+var selectingStart = false;
+var selectingEnd = false;
+var placingBlock = false;
 
-startx.value = 0;
-starty.value = 0;
-endx.value = pointCount-1;
-endy.value = pointCount-1;
+document.getElementById("toggleSelectStart").addEventListener("click", ()=>{
+    selectingStart = true;
+    selectingEnd = false;
+    placingBlock = false;
+    start = false;
+});
 
-startx.max = pointCount-1;
-starty.max = pointCount-1;
-endx.max = pointCount-1;
-endy.max = pointCount-1;
+document.getElementById("toggleSelectEnd").addEventListener("click", ()=>{
+    selectingEnd = true;
+    selectingStart = false;
+    placingBlock = false;
+    start = false;
+});
 
+document.getElementById("placeBlock").addEventListener("click", ()=>{
+    placingBlock = true;
+    selectingStart = false;
+    selectingEnd = false;
+    start = false;
+});
+
+document.getElementById("resetBlock").addEventListener("click", ()=>{
+    c = color(255,255,255);
+    fill(c);
+    strokeWeight(1);
+    stroke(1);
+    for(let i = 0; i < pointCount; i++){
+        for(let j = 0; j < pointCount; j++){
+            grid[j][i] = null;
+            square(xpos[j], ypos[i], size);
+        }
+    }
+});
+
+function mouseClicked() {
+    if(selectingStart){
+        if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
+            sx = floor(mouseX/pointCount);
+            sy = floor(mouseY/pointCount);
+            selectingStart = false;
+        }
+    } else if(selectingEnd){
+        if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
+            ex = floor(mouseX/pointCount);
+            ey = floor(mouseY/pointCount);
+            selectingEnd = false;
+        }
+    } else if(placingBlock){
+        if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
+            grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
+            console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
+        }
+    }
+}
 
 // ANIMATION + LOGIC
 
@@ -102,6 +150,8 @@ let found = false;
 
 function draw() {
 
+    console.log(placingBlock);
+
     if(start){
         if(!found && q !== undefined && q.length > 0){
             var cx = q[0][0];
@@ -116,28 +166,27 @@ function draw() {
                 if(nx < 0 || ny < 0) continue;
                 if(nx >= pointCount || ny >= pointCount) continue;
                 if(distance[nx][ny] != -1) continue;
-                if(grid[nx][ny] == 'x') continue;
+                if(grid[ny][nx] == 'x') continue;
                 distance[nx][ny] = distance[cx][cy]+1;
                 q.push([nx, ny]);
             }
-    
-    
     
         }
     
         if(distance[ex][ey] != -1){
             found = true;
-            let c = color(0,255,0);
-            fill(c);
-            noStroke();
-            square(xpos[ex], xpos[ey], size);
         }
     
+        c = color(0,255,0);
+        fill(c);
+        noStroke();
+        square(xpos[ex], xpos[ey], size);
+
         if(!found){
             for(var i = 0; i < pointCount; i++){
                 for(var j = 0; j < pointCount; j++){
                     if(distance[i][j] !== -1){
-                        let c = color(255,204,0);
+                        c = color(255,204,0);
                         fill(c);
                         noStroke();
                         square(xpos[i], ypos[j], size);
@@ -149,26 +198,23 @@ function draw() {
         for(var i = 0; i < pointCount; i++){
             for(var j = 0; j < pointCount; j++){
                 if(grid[i][j] === 'x'){
-                    let c = color(255,0,0);
+                    c = color(255,0,0);
                     fill(c);
                     noStroke();
-                    square(xpos[i], ypos[j], size);
+                    square(xpos[j], ypos[i], size);
                 }
             }
         }
     
-        let c = color(0,0,255);
+        c = color(0,0,255);
         fill(c);
         noStroke();
         square(xpos[sx], ypos[sy], size);
 
     } else {
-        sx = startx.value;
-        sy = starty.value;
-        ex = endx.value;
-        ey = endy.value;
         found = false;
-        let c = color(255,255,255);
+
+        c = color(255,255,255);
         fill(c);
         strokeWeight(1);
         stroke(1);
@@ -177,7 +223,27 @@ function draw() {
                 square(xpos[i], ypos[j], size);
             }
         }
+
         reset(sx,sy,ex,ey)
+
+        c = color(255,0,0);
+        fill(c);
+        strokeWeight(1);
+        stroke(1);
+
+        for(var i = 0; i < pointCount; i++){
+            for(var j = 0; j < pointCount; j++){
+                if(grid[i][j] === 'x'){
+                    square(xpos[j], ypos[i], size);
+                }
+            }
+        }
+
+        c = color(0,255,0);
+        fill(c);
+        noStroke();
+        square(xpos[ex], ypos[ey], size);
+
         c = color(0,0,255);
         fill(c);
         noStroke();
