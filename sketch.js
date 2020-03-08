@@ -36,9 +36,17 @@ var ey = pointCount-1;
 var sx = 0;
 var sy = 0;
 
+// COLORS
+
+startColor = [30,136,229]
+endColor = [85,139,47]
+blockColor = [255,61,0];
+
 // INPUT
 
-document.getElementById("startButton").addEventListener("click", ()=>{
+startButton = document.getElementById("startButton");
+
+startButton.addEventListener("click", ()=>{
     selectingStart = false;
     selectingEnd = false;
     placingBlock = false;
@@ -96,12 +104,13 @@ function mouseClicked() {
             ey = floor(mouseY/pointCount);
             selectingEnd = false;
         }
-    } else if(placingBlock){
-        if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
-            grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
-            console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
-        }
     }
+    //else if(placingBlock){
+    //     if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
+    //         grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
+    //         console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
+    //     }
+    // }
 }
 
 // ANIMATION + LOGIC
@@ -150,9 +159,15 @@ let found = false;
 
 function draw() {
 
-    console.log(placingBlock);
+    if(mouseIsPressed && placingBlock){
+        if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
+            grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
+            console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
+        }
+    }
 
     if(start){
+        startButton.innerText = "clear";
         if(!found && q !== undefined && q.length > 0){
             var cx = q[0][0];
             var cy = q[0][1];
@@ -177,7 +192,7 @@ function draw() {
             found = true;
         }
     
-        c = color(0,255,0);
+        c = color(endColor);
         fill(c);
         noStroke();
         square(xpos[ex], xpos[ey], size);
@@ -198,7 +213,7 @@ function draw() {
         for(var i = 0; i < pointCount; i++){
             for(var j = 0; j < pointCount; j++){
                 if(grid[i][j] === 'x'){
-                    c = color(255,0,0);
+                    c = color(blockColor);
                     fill(c);
                     noStroke();
                     square(xpos[j], ypos[i], size);
@@ -206,12 +221,13 @@ function draw() {
             }
         }
     
-        c = color(0,0,255);
+        c = color(startColor);
         fill(c);
         noStroke();
         square(xpos[sx], ypos[sy], size);
 
     } else {
+        startButton.innerText = "start";
         found = false;
 
         c = color(255,255,255);
@@ -226,7 +242,7 @@ function draw() {
 
         reset(sx,sy,ex,ey)
 
-        c = color(255,0,0);
+        c = color(blockColor);
         fill(c);
         strokeWeight(1);
         stroke(1);
@@ -239,12 +255,12 @@ function draw() {
             }
         }
 
-        c = color(0,255,0);
+        c = color(endColor);
         fill(c);
         noStroke();
         square(xpos[ex], ypos[ey], size);
 
-        c = color(0,0,255);
+        c = color(startColor);
         fill(c);
         noStroke();
         square(xpos[sx], ypos[sy], size);

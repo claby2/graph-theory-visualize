@@ -1,0 +1,45 @@
+body {
+    margin: 50px 1vw 1vh 1vw !important;
+    font-family: 'Karla';
+    background-color: #424242;
+    line-height: 1.4;
+    overflow: hidden;
+}
+
+.menu {
+    position: absolute;
+    display: flex;
+    top: 1vh;
+    right: 1vw;
+    left: 1vw;
+}
+
+#startButton {
+    width: 150px;
+}
+
+#toggleSelectStart {
+    background-color: #1E88E5;
+    border: solid rgba(255, 255, 255, 0) 2px;
+}
+
+#toggleSelectEnd{
+    background-color: #558B2F;
+    border: solid rgba(255, 255, 255, 0) 2px;
+}
+
+#placeBlock{
+    background-color: #FF3D00;
+    border: solid rgba(255, 255, 255, 0) 2px;
+}
+
+
+button {
+    text-transform: uppercase;
+    font-family: 'Karla';
+    background-color: #212121;
+    color: #FFFFFF;
+    font-size: 1.5em;
+    border: solid #FFFFFF 2px;
+    margin: 0 2vw 0 2vw;
+}
