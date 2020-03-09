@@ -11,13 +11,26 @@
 </head>
 <body>
 
-    <navbar class = "menu">
-        <button id = "startButton">start</button>
-        <button id = "toggleSelectStart">select start point</button>
-        <button id = "toggleSelectEnd">select end point</button>
-        <button id = "placeBlock">place block(s)</button>
-        <button id = "resetBlock">reset block(s)</button>
-    </navbar>
+    <section class = "section">
+        <navbar class = "menu">
+            <button id = "startButton">start</button>
+            <button id = "toggleSelectStart">select start point</button>
+            <button id = "toggleSelectEnd">select end point</button>
+            <button id = "placeBlock">place block(s)</button>
+            <button id = "resetBlock">reset block(s)</button>
+    
+            <select id = "algorithmSelect">
+                <option value = "bfs">Breadth-First Search</option>
+                <option value = "dfs">Depth-First Search</option>
+            </select>
+        </navbar>
+
+        <div id = "statusOutput">
+            <p id = "accessCount">0</p>
+            <p id = "status">Not Running</p>
+        </div>
+
+    </section>
 
 
     <script src="sketch.js"></script>

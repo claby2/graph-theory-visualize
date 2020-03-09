@@ -1,6 +1,6 @@
 var start = false;
 
-const pointCount = Math.floor(Math.min(window.innerWidth, window.innerHeight)/32);
+var pointCount = Math.floor(Math.min(window.innerWidth, window.innerHeight)/35);
 
 var size = pointCount;
 
@@ -8,6 +8,8 @@ var c;
 
 var xpos = [];
 var ypos = [];
+
+var algorithm;
 
 for(var i = 0; i < pointCount; i++){
     xpos[i] = i*pointCount;
@@ -35,6 +37,17 @@ var ey = pointCount-1;
 
 var sx = 0;
 var sy = 0;
+
+var visited = [];
+
+for(var i = 0; i < pointCount; i++){
+    visited[i] = new Array(pointCount);
+    for(var j = 0; j < pointCount; j++){
+        visited[i][j] = 0;
+    }
+}
+
+var accessNum = 0;
 
 // COLORS
 
@@ -79,16 +92,7 @@ document.getElementById("placeBlock").addEventListener("click", ()=>{
 });
 
 document.getElementById("resetBlock").addEventListener("click", ()=>{
-    c = color(255,255,255);
-    fill(c);
-    strokeWeight(1);
-    stroke(1);
-    for(let i = 0; i < pointCount; i++){
-        for(let j = 0; j < pointCount; j++){
-            grid[j][i] = null;
-            square(xpos[j], ypos[i], size);
-        }
-    }
+    resetBlocks();
 });
 
 function mouseClicked() {
@@ -105,17 +109,51 @@ function mouseClicked() {
             selectingEnd = false;
         }
     }
-    //else if(placingBlock){
-    //     if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
-    //         grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
-    //         console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
-    //     }
-    // }
 }
+
+window.addEventListener("resize", ()=>{
+    start = false;
+
+    pointCount = Math.floor(Math.min(window.innerWidth, window.innerHeight)/35);
+    
+    size = pointCount;
+    for(var i = 0; i < pointCount; i++){
+        xpos[i] = i*pointCount;
+        ypos[i] = i*pointCount;
+    }
+
+    ex = pointCount-1;
+    ey = pointCount-1; 
+    sx = 0;
+    sy = 0;
+
+    reset(sx,sy,ex,ey)
+    resetBlocks();
+    setup();
+})
 
 // ANIMATION + LOGIC
 
+let statusOutput = document.getElementById("statusOutput");
+let accessCount = document.getElementById("accessCount");
+let status = document.getElementById("status");
+
+function resetBlocks(){
+    c = color(255,255,255);
+    fill(c);
+    strokeWeight(1);
+    stroke(1);
+    for(let i = 0; i < pointCount; i++){
+        for(let j = 0; j < pointCount; j++){
+            grid[j][i] = null;
+            square(xpos[j], ypos[i], size);
+        }
+    }
+}
+
 function reset(isx, isy, iex, iey) {
+    accessNum = 0;
+
     isx = parseInt(isx, 10);
     isy = parseInt(isy, 10);
     iex = parseInt(iex, 10);
@@ -126,8 +164,8 @@ function reset(isx, isy, iex, iey) {
     sx = isx;
     sy = isy;
 
-    for(let i = 0; i < pointCount; i++){
-        for(let j = 0; j < pointCount; j++){
+    for(var i = 0; i < pointCount; i++){
+        for(var j = 0; j < pointCount; j++){
             distance[i][j] = -1;
         }
     }
@@ -136,7 +174,15 @@ function reset(isx, isy, iex, iey) {
     
     q.push([isx, isy]);
     
-    ex = iex; ey = iey;
+    ex = iex; 
+    ey = iey;
+
+    //DFS reset
+    for(var i = 0; i < pointCount; i++){
+        for(var j = 0; j < pointCount; j++){
+            visited[i][j] = 0;
+        }
+    }
 }
 
 reset(sx,sy,ex,ey)
@@ -145,7 +191,7 @@ var dx = [0, 0, 1, -1];
 var dy = [1, -1, 0, 0];
 
 function setup() {
-    createCanvas(displayWidth, displayHeight);
+    createCanvas(window.innerWidth, window.innerHeight);
 
     for(var i = 0; i < pointCount; i++){
         for(var j = 0; j < pointCount; j++){
@@ -157,77 +203,152 @@ function setup() {
 
 let found = false;
 
+
+//Draw
+
 function draw() {
+
+    accessCount.innerText = accessNum;
+
+    algorithm = document.getElementById("algorithmSelect").value;
+
 
     if(mouseIsPressed && placingBlock){
         if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
             grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)] = 'x';
-            console.log(grid[floor(mouseY/pointCount)][floor(mouseX/pointCount)]);
         }
     }
 
     if(start){
+        if(found){
+            status.style.color = "#76FF03";
+            status.innerText = "Found!";
+        } else {
+            status.style.color = "#FFFF00";
+            status.innerText = "Searching..."
+        }
         startButton.innerText = "clear";
-        if(!found && q !== undefined && q.length > 0){
-            var cx = q[0][0];
-            var cy = q[0][1];
-    
-            q.shift();
-    
-    
-            for(var i = 0; i < 4; i++){
-                var nx = cx + dx[i];
-                var ny = cy + dy[i];
-                if(nx < 0 || ny < 0) continue;
-                if(nx >= pointCount || ny >= pointCount) continue;
-                if(distance[nx][ny] != -1) continue;
-                if(grid[ny][nx] == 'x') continue;
-                distance[nx][ny] = distance[cx][cy]+1;
-                q.push([nx, ny]);
+        if(algorithm === "bfs"){
+            if(!found && q !== undefined && q.length > 0){
+                var cx = q[0][0];
+                var cy = q[0][1];
+        
+                q.shift();
+        
+                for(var i = 0; i < 4; i++){
+                    var nx = cx + dx[i];
+                    var ny = cy + dy[i];
+                    if(nx < 0 || ny < 0) continue;
+                    if(nx >= pointCount || ny >= pointCount) continue;
+                    if(distance[nx][ny] != -1) continue;
+                    if(grid[ny][nx] == 'x') continue;
+                    distance[nx][ny] = distance[cx][cy]+1;
+                    accessNum++;
+                    q.push([nx, ny]);
+                }
+        
             }
+        
+            if(distance[ex][ey] !== -1){
+                found = true;
+            }
+        
+            c = color(endColor);
+            fill(c);
+            noStroke();
+            square(xpos[ex], xpos[ey], size);
     
-        }
-    
-        if(distance[ex][ey] != -1){
-            found = true;
-        }
-    
-        c = color(endColor);
-        fill(c);
-        noStroke();
-        square(xpos[ex], xpos[ey], size);
-
-        if(!found){
-            for(var i = 0; i < pointCount; i++){
-                for(var j = 0; j < pointCount; j++){
-                    if(distance[i][j] !== -1){
-                        c = color(255,204,0);
-                        fill(c);
-                        noStroke();
-                        square(xpos[i], ypos[j], size);
+            if(!found){
+                for(var i = 0; i < pointCount; i++){
+                    for(var j = 0; j < pointCount; j++){
+                        if(distance[i][j] !== -1){
+                            c = color(255,204,0);
+                            fill(c);
+                            noStroke();
+                            square(xpos[i], ypos[j], size);
+                        }
                     }
                 }
             }
-        }
-    
-        for(var i = 0; i < pointCount; i++){
-            for(var j = 0; j < pointCount; j++){
-                if(grid[i][j] === 'x'){
-                    c = color(blockColor);
-                    fill(c);
-                    noStroke();
-                    square(xpos[j], ypos[i], size);
+        
+            for(var i = 0; i < pointCount; i++){
+                for(var j = 0; j < pointCount; j++){
+                    if(grid[i][j] === 'x'){
+                        c = color(blockColor);
+                        fill(c);
+                        noStroke();
+                        square(xpos[j], ypos[i], size);
+                    }
                 }
             }
-        }
+        
+            c = color(startColor);
+            fill(c);
+            noStroke();
+            square(xpos[sx], ypos[sy], size);
+        } else if(algorithm === "dfs"){
+            if(!found && q !== undefined && q.length > 0){
+                var cx = q[q.length-1][0];
+                var cy = q[q.length-1][1];
+                visited[cx][cy] = 1;
+                q.pop();
+                for(var i = 0; i < 4; i++){
+                    var nx = cx + dx[i];
+                    var ny = cy + dy[i];
+                    if(nx < 0 || ny < 0) continue;
+                    if(nx >= pointCount || ny >= pointCount) continue;
+                    if(visited[nx][ny]) continue;
+                    if(grid[ny][nx] == 'x') continue;
+                    accessNum++;
+                    q.push([nx, ny]);
+                }
+            }
+
+            if(visited[ex][ey] !== 0){
+                found = true;
+            }
+        
+            c = color(endColor);
+            fill(c);
+            noStroke();
+            square(xpos[ex], xpos[ey], size);
     
-        c = color(startColor);
-        fill(c);
-        noStroke();
-        square(xpos[sx], ypos[sy], size);
+            if(!found){
+                for(var i = 0; i < pointCount; i++){
+                    for(var j = 0; j < pointCount; j++){
+                        if(visited[i][j] !== 0){
+                            c = color(255,204,0);
+                            fill(c);
+                            noStroke();
+                            square(xpos[i], ypos[j], size);
+                        }
+                    }
+                }
+            }
+        
+            for(var i = 0; i < pointCount; i++){
+                for(var j = 0; j < pointCount; j++){
+                    if(grid[i][j] === 'x'){
+                        c = color(blockColor);
+                        fill(c);
+                        noStroke();
+                        square(xpos[j], ypos[i], size);
+                    }
+                }
+            }
+        
+            c = color(startColor);
+            fill(c);
+            noStroke();
+            square(xpos[sx], ypos[sy], size);
+
+
+        }
 
     } else {
         startButton.innerText = "start";
+        status.style.color = "#FAFAFA";
+        status.innerText = "Not Running";
         found = false;
 
         c = color(255,255,255);

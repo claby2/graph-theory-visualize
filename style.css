@@ -1,17 +1,32 @@
 body {
-    margin: 50px 1vw 1vh 1vw !important;
+    margin: 1vh 1vw 1vh 1vw !important;
     font-family: 'Karla';
     background-color: #424242;
     line-height: 1.4;
     overflow: hidden;
 }
 
-.menu {
-    position: absolute;
+.section {
     display: flex;
-    top: 1vh;
-    right: 1vw;
-    left: 1vw;
+    flex-direction: column;
+}
+
+#statusOutput {
+    color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+
+#statusOutput p {
+    margin: 0;
+}
+
+#status {
+    color: #FAFAFA;
+}
+
+.menu {
+    width: auto;
 }
 
 #startButton {
@@ -34,12 +49,12 @@ body {
 }
 
 
-button {
+button, select, option{
     text-transform: uppercase;
     font-family: 'Karla';
     background-color: #212121;
     color: #FFFFFF;
-    font-size: 1.5em;
+    font-size: 1.2em;
     border: solid #FFFFFF 2px;
-    margin: 0 2vw 0 2vw;
+    margin: 0 4vw 0 0;
 }
