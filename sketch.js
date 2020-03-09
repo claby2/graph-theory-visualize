@@ -190,6 +190,64 @@ reset(sx,sy,ex,ey)
 var dx = [0, 0, 1, -1];
 var dy = [1, -1, 0, 0];
 
+let genMazeButton = document.getElementById("genMazeButton");
+
+function generateMaze(){
+
+    for(var i = 0; i < pointCount; i++){
+        for(var j = 0; j < pointCount; j++){
+            grid[i][j] = 'x';
+        }
+    }
+
+    grid[sx][sy] = null;
+
+    let walls =[];
+
+    if(sx+1 < pointCount) walls.push([sx+1, sy]);
+    if(sx-1 >= 0) walls.push([sx-1, sy]);
+    if(sy+1 < pointCount) walls.push([sx, sy+1]);
+    if(sy-1 >= 0) walls.push([sx, sy-1]);
+
+
+    while(walls.length > 0){
+        let randomWall = Math.floor(Math.random()*walls.length);
+        var nx = walls[randomWall][0];
+        var ny = walls[randomWall][1];
+        
+        let uc = [];
+
+        if(nx + 1 < pointCount && grid[nx+1][ny] !== 'x') uc.push([nx-1, ny]);
+        if(nx - 1 >= 0 && grid[nx-1][ny] !== 'x') uc.push([nx+1, ny]);
+        if(ny + 1 < pointCount && grid[nx][ny+1] !== 'x') uc.push([nx, ny-1]);
+        if(ny - 1 >= 0 && grid[nx][ny-1] !== 'x') uc.push([nx, ny+1]);
+
+        if(uc.length === 1){
+            grid[nx][ny] = null;
+            if(uc[0][0] >= 0 && uc[0][0] < pointCount && uc[0][1] >= 0 && uc[0][1] < pointCount){
+                grid[uc[0][0]][uc[0][1]] = null;
+
+                if(uc[0][0] + 1 < pointCount && grid[uc[0][0]+1][uc[0][1]] === 'x') walls.push([uc[0][0]+1, uc[0][1]]);
+                if(uc[0][0] - 1 >= 0 && grid[uc[0][0]-1][uc[0][1]] === 'x') walls.push([uc[0][0]-1, uc[0][1]]);
+                if(uc[0][1] + 1 < pointCount && grid[uc[0][0]][uc[0][1]+1] === 'x') walls.push([uc[0][0], uc[0][1]+1]);
+                if(uc[0][1] - 1 >= 0 && grid[uc[0][0]][uc[0][1]-1] === 'x') walls.push([uc[0][0], uc[0][1]-1]);
+
+            }
+        }
+
+        walls.splice(randomWall, 1);
+    }
+
+}
+
+genMazeButton.addEventListener("click", ()=>{
+    selectingEnd = false;
+    selectingStart = false;
+    placingBlock = false;
+    start = false;
+    generateMaze();
+})
+
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
 
@@ -203,7 +261,6 @@ function setup() {
 
 let found = false;
 
-
 //Draw
 
 function draw() {
@@ -211,7 +268,6 @@ function draw() {
     accessCount.innerText = accessNum;
 
     algorithm = document.getElementById("algorithmSelect").value;
-
 
     if(mouseIsPressed && placingBlock){
         if(mouseX <= pointCount*pointCount && mouseX >= 0 && mouseY <= pointCount*pointCount && mouseY >= 0){
