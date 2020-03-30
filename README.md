@@ -2,4 +2,11 @@
 
 Graph Theory Visualizer Using P5js.
 
-https://www.edwardwibowo.com/graphtheory-visualize/
+[Result](https://www.edwardwibowo.com/graphtheory-visualize/)
+
+Read more about the visualizer in my [blog](https://www.edwardwibowo.com/blog/blogposts/4.html).
+
+# Algorithms
+- Depth-first search
+- Breadth-first search
+- Randomized Prim's Algorithm for maze generation
