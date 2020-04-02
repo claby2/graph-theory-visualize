@@ -1,4 +1,4 @@
-# graphtheory-visualize
+# Graph Theory Visualize
 
 Graph Theory Visualizer Using p5js.
 
